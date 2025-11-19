@@ -1,12 +1,13 @@
 from .base import BaseBackend
 from .torch_backend import TorchBackend
+from .sklearn_backend import SklearnBackend
 
 
 def create_backend(model, backend: str, logger=None) -> BaseBackend:
     """
     Se backend='auto' prova a riconoscere il tipo di modello.
-    Per ora gestiamo solo PyTorch.
     """
+    # ---------- PyTorch ---------- #
     if backend in ("torch", "auto"):
         try:
             import torch
@@ -15,6 +16,16 @@ def create_backend(model, backend: str, logger=None) -> BaseBackend:
                 return TorchBackend(model, logger=logger)
         except ImportError:
             if backend == "torch":
+                raise
+
+    # ---------- Sklearn ---------- #
+    if backend in ("sklearn", "auto"):
+        try:
+            from sklearn.base import BaseEstimator
+            if isinstance(model, BaseEstimator):
+                return SklearnBackend(model, logger=logger)
+        except ImportError:
+            if backend == "sklearn":
                 raise
 
     raise ValueError(f"Impossibile determinare il backend per il modello: {type(model)}")
