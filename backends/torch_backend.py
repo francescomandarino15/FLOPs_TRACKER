@@ -33,7 +33,7 @@ class TorchBackend(BaseBackend):
     # ---------------- START / STOP ---------------- #
 
     def start(self):
-        # Hook sui layer che vogliamo tracciare
+        # Hook sui layer da tracciare
         for module in self.model.modules():
             if isinstance(
                 module,
@@ -75,7 +75,7 @@ class TorchBackend(BaseBackend):
             ):
                 h = module.register_forward_hook(self._layer_hook)
                 self._layer_handles.append(h)
-            # NOTA: Dropout, PixelShuffle, Padding ecc. hanno FLOPs ~0 → li ignoriamo.
+            # i layer: Dropout, PixelShuffle, Padding hanno FLOPs ~0.
 
         # Hook sul modello root per identificare inizio/fine batch
         pre_h = self.model.register_forward_pre_hook(self._on_batch_start)
@@ -93,11 +93,11 @@ class TorchBackend(BaseBackend):
     # ---------------- HOOK DI BATCH ---------------- #
 
     def _on_batch_start(self, module, input):
-        # inizio di un nuovo batch: azzero conteggio locale
+        # inizio di un nuovo batch
         self._current_batch_flops = 0
 
     def _on_batch_end(self, module, input, output):
-        # fine batch: aggiorno contatori e loggo
+        # fine batch
         batch_flops = self._current_batch_flops
         self._last_batch_flops = batch_flops
         self.total_flops += batch_flops
@@ -173,7 +173,7 @@ class TorchBackend(BaseBackend):
         elif isinstance(layer, nn.EmbeddingBag):
             flops = self._embeddingbag_flops(layer, x, y)
 
-        # Dropout, PixelShuffle, Padding, Shuffle ecc. -> flops ~ 0, ignorati
+        # Dropout, PixelShuffle, Padding, Shuffle -> flops ~ 0 -> vengono ignorati
 
         self._current_batch_flops += int(flops)
 
@@ -214,7 +214,6 @@ class TorchBackend(BaseBackend):
         return flops_per_out * num_out_elements
 
     def _convtranspose1d_flops(self, conv: nn.ConvTranspose1d, x, y):
-        # formula analoga alla conv
         batch_size = x.shape[0]
         C_in = conv.in_channels
         C_out = conv.out_channels
