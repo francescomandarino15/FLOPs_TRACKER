@@ -44,7 +44,7 @@ def main():
     loss_fn = nn.CrossEntropyLoss()
 
     #  CONFIGURAZIONE WANDB
-    WANDB_API_KEY = "70496d4cf370b6213bcccec19098c5167a8f1a9c"  
+    WANDB_API_KEY = "Tocken_wandb"  
     WANDB_PROJECT = "flops-tracker-demo"
 
     # FlopsTracker + wandb 
