@@ -31,16 +31,11 @@ class FlopsTracker:
 
     @property
     def raw_flops(self) -> int:
-        """FLOPs grezzi contati dal backend (somma dei layer)."""
+        """FLOPs (somma dei layer)."""
         return self._raw_flops
 
     @property
     def total_flops(self) -> float:
-        """
-        FLOPs totali "esposti" all'utente.
-        Per ora coincidono con i raw FLOPs,
-        ma puoi usare questo per eventuali correzioni future.
-        """
         return self._total_flops
 
     @property
