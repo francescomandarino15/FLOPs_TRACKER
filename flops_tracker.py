@@ -5,12 +5,12 @@ from typing import Optional, Any
 from .tracker import Tracker
 
 
-class FlopsTracker:
+class FlopTracker:
     """
     Entry point pubblico della libreria.
 
     Uso:
-        ft = FlopsTracker(run_name="dp_cnn").torch_bind(
+        ft = FlopTracker(run_name="dp_cnn").torch_bind(
             model=model,
             optimizer=optimizer,
             loss_fn=loss_fn,
@@ -18,25 +18,25 @@ class FlopsTracker:
             device=device,
             epochs=10,
             log_per_batch=True,
-            export_path="flops.csv",
+            export_path="flop.csv",
             use_wandb=False,
         )
     """
 
     def __init__(self, run_name: Optional[str] = None):
         self.run_name = run_name
-        self._raw_flops: int = 0
-        self._total_flops: float = 0.0 
+        self._raw_flop: int = 0
+        self._total_flop: float = 0.0 
         self._history: dict[str, Any] = {}
 
     @property
-    def raw_flops(self) -> int:
-        """FLOPs (somma dei layer)."""
-        return self._raw_flops
+    def raw_flop(self) -> int:
+        """FLOP (somma dei layer)."""
+        return self._raw_flop
 
     @property
-    def total_flops(self) -> float:
-        return self._total_flops
+    def total_flop(self) -> float:
+        return self._total_flop
 
     @property
     def history(self) -> dict[str, Any]:
@@ -60,10 +60,10 @@ class FlopsTracker:
         use_wandb: bool = False,
         wandb_project: Optional[str] = None,
         wandb_token: Optional[str] = None,
-    ) -> "FlopsTracker":
+    ) -> "FlopTracker":
         """
-        Esegue training + tracking FLOPs per un modello PyTorch.
-        questa funzione incapsula loop per batch/epoch e print dei FLOPs totatli (totalmente trasparente per l'utente).
+        Esegue training + tracking FLOP per un modello PyTorch.
+        questa funzione incapsula loop per batch/epoch e print dei FLOP totatli (totalmente trasparente per l'utente).
         """
 
         if device is not None:
@@ -103,13 +103,13 @@ class FlopsTracker:
                 if tr.logger is not None and hasattr(tr.logger, "log_epoch"):
                     tr.logger.log_epoch(
                         epoch=epoch,
-                        flops=tr.total_flops,
-                        cumulative_flops=tr.total_flops,
+                        flop=tr.total_flop,
+                        cumulative_flop=tr.total_flop,
                     )
 
             
-            self._raw_flops = tr.total_flops
-            self._total_flops = float(self._raw_flops)
+            self._raw_flop = tr.total_flop
+            self._total_flop = float(self._raw_flop)
 
             self._history["backend"] = backend
             self._history["export_path"] = export_path
@@ -117,11 +117,11 @@ class FlopsTracker:
             self._history["wandb_project"] = wandb_project
             self._history["epochs"] = epochs
 
-        # STAMPA AUTOMATICA DEI FLOPs TOTALI
+        # STAMPA AUTOMATICA DEI FLOP TOTALI
         run_label = f"[{self.run_name}]" if self.run_name is not None else ""
         print(
-            f"[FlopsTracker{run_label}] FLOPs totali: {self._total_flops:.0f} "
-            f"(raw: {self._raw_flops})"
+            f"[FlopTracker{run_label}] FLOP totali: {self._total_flop:.0f} "
+            f"(raw: {self._raw_flop})"
         )
 
         return self
@@ -143,10 +143,10 @@ class FlopsTracker:
         use_wandb: bool = False,
         wandb_project: Optional[str] = None,
         wandb_token: Optional[str] = None,
-    ) -> "FlopsTracker":
+    ) -> "FlopTracker":
         """
         Esegue training / inferenza per un modello HuggingFace (transformers),
-        stimando i FLOPs.
+        stimando i FLOP.
 
         Assunzioni:
         - dataloader restituisce dict con chiavi tipo:
@@ -158,16 +158,16 @@ class FlopsTracker:
 
         Uso tipico:
 
-            ft = FlopsTracker(run_name="bert_mrpc").hf_bind(
+            ft = FlopTracker(run_name="bert_mrpc").hf_bind(
                 model=model,
                 dataloader=train_loader,
                 optimizer=optimizer,
                 device="cuda",
                 epochs=3,
                 log_per_batch=True,
-                export_path="bert_flops.csv",
+                export_path="bert_flop.csv",
                 use_wandb=True,
-                wandb_project="flops-thesis",
+                wandb_project="flop-thesis",
             )
         """
 
@@ -215,12 +215,12 @@ class FlopsTracker:
                 if tr.logger is not None and hasattr(tr.logger, "log_epoch"):
                     tr.logger.log_epoch(
                         epoch=epoch,
-                        flops=tr.total_flops,
-                        cumulative_flops=tr.total_flops,
+                        flop=tr.total_flop,
+                        cumulative_flop=tr.total_flop,
                     )
 
-            self._raw_flops = tr.total_flops
-            self._total_flops = float(self._raw_flops)
+            self._raw_flop = tr.total_flop
+            self._total_flop = float(self._raw_flop)
 
             self._history["backend"] = backend
             self._history["export_path"] = export_path
@@ -232,8 +232,8 @@ class FlopsTracker:
         run_label = f"[{self.run_name}]" if self.run_name is not None else ""
         mode_label = "train" if optimizer is not None else "inference"
         print(
-            f"[FlopsTracker{run_label}] FLOPs totali (HF, mode={mode_label}): "
-            f"{self._total_flops:.0f} (raw: {self._raw_flops})"
+            f"[FlopTracker{run_label}] FLOP totali (HF, mode={mode_label}): "
+            f"{self._total_flop:.0f} (raw: {self._raw_flop})"
         )
 
         return self
@@ -253,21 +253,21 @@ class FlopsTracker:
         use_wandb: bool = False,
         wandb_project: Optional[str] = None,
         wandb_token: Optional[str] = None,
-    ) -> "FlopsTracker":
+    ) -> "FlopTracker":
         """
-        Esegue fit/predict per un modello sklearn e traccia i FLOPs.
+        Esegue fit/predict per un modello sklearn e traccia i FLOP.
 
         Esempi:
-            ft = FlopsTracker(run_name="lr").sklearn_bind(
+            ft = FlopTracker(run_name="lr").sklearn_bind(
                 model=clf,
                 X=X_train,
                 y=y_train,
                 mode="fit",
                 log_per_call=True,
-                export_path="flops_lr.csv",
+                export_path="flop_lr.csv",
             )
 
-            ft = FlopsTracker(run_name="knn").sklearn_bind(
+            ft = FlopTracker(run_name="knn").sklearn_bind(
                 model=knn,
                 X=X_test,
                 mode="predict",
@@ -304,8 +304,8 @@ class FlopsTracker:
             else:
                 raise ValueError(f"Modo sklearn_bind non supportato: {mode}")
 
-            self._raw_flops = tr.total_flops
-            self._total_flops = float(self._raw_flops)
+            self._raw_flop = tr.total_flop
+            self._total_flop = float(self._raw_flop)
 
             self._history["backend"] = backend
             self._history["export_path"] = export_path
@@ -315,8 +315,8 @@ class FlopsTracker:
 
         run_label = f"[{self.run_name}]" if self.run_name is not None else ""
         print(
-            f"[FlopsTracker{run_label}] FLOPs totali (sklearn, mode={mode}): "
-            f"{self._total_flops:.0f} (raw: {self._raw_flops})"
+            f"[FlopTracker{run_label}] FLOP totali (sklearn, mode={mode}): "
+            f"{self._total_flop:.0f} (raw: {self._raw_flop})"
         )
 
         return self
