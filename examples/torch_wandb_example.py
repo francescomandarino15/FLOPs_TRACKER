@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 
-from flops_tracker import FlopsTracker
+from flop_tracker import FlopTracker
 
 
 class SimpleCNN(nn.Module):
@@ -45,10 +45,10 @@ def main():
 
     #  CONFIGURAZIONE WANDB
     WANDB_API_KEY = "Tocken_wandb"  
-    WANDB_PROJECT = "flops-tracker-demo"
+    WANDB_PROJECT = "flop-tracker-demo"
 
-    # FlopsTracker + wandb 
-    ft = FlopsTracker(run_name="torch_cnn_wandb_silent").torch_bind(
+    # FlopTracker + wandb 
+    ft = FlopTracker(run_name="torch_cnn_wandb_silent").torch_bind(
         model=model,
         optimizer=optimizer,
         loss_fn=loss_fn,
@@ -58,15 +58,15 @@ def main():
         backend="torch",
         log_per_batch=True,           # log per batch su wandb
         log_per_epoch=True,           # log per epoch su wandb
-        export_path="torch_cnn_wandb_flops.csv",  # CSV locale opzionale
+        export_path="torch_cnn_wandb_flop.csv",  # CSV locale opzionale
         use_wandb=True,               # attiva wandb
         wandb_project=WANDB_PROJECT,
         wandb_token=WANDB_API_KEY,    # login tramite API key
     )
 
-    # OPZIONALI, il tracker stampa già i FLOPs totali
-    print("Raw FLOPs:", ft.raw_flops)
-    print("Total FLOPs:", ft.total_flops)
+    # OPZIONALI, il tracker stampa già i FLOP totali
+    print("Raw FLOP:", ft.raw_flop)
+    print("Total FLOP:", ft.total_flop)
 
 
 if __name__ == "__main__":
