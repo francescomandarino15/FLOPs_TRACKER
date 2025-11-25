@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from datasets import load_dataset
 
-from flops_tracker import FlopsTracker
+from flop_tracker import FlopTracker
 
 
 def collate_fn(batch, tokenizer, max_length=128):
@@ -40,7 +40,7 @@ def main():
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=2e-5)
 
-    ft = FlopsTracker(run_name="hf_distilbert_sst2").hf_bind(
+    ft = FlopTracker(run_name="hf_distilbert_sst2").hf_bind(
         model=model,
         dataloader=loader,
         optimizer=optimizer,
@@ -48,12 +48,12 @@ def main():
         epochs=1,
         log_per_batch=True,
         log_per_epoch=True,
-        export_path="hf_distilbert_flops.csv",
+        export_path="hf_distilbert_flop.csv",
         use_wandb=False,
     )
 
-    print("Raw FLOPs:", ft.raw_flops)
-    print("Total FLOPs:", ft.total_flops)
+    print("Raw FLOP:", ft.raw_flop)
+    print("Total FLOP:", ft.total_flop)
 
 
 if __name__ == "__main__":
