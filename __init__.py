@@ -1,3 +1,3 @@
-from .flops_tracker import FlopsTracker
+from .flop_tracker import FlopTracker
 
-__all__ = ["FlopsTracker"]
+__all__ = ["FlopTracker"]
