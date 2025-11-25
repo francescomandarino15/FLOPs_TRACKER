@@ -10,7 +10,7 @@ class CsvLogger(BaseLogger):
         self._entries_batch = []
         self._entries_epoch = []
 
-    def log_batch(self, step, flops, cumulative_flops, epoch=None):
+    def log_batch(self, step, flop, cumulative_flop, epoch=None):
         if not self.log_per_batch:
             return
         self._entries_batch.append(
@@ -18,20 +18,20 @@ class CsvLogger(BaseLogger):
                 "type": "batch",
                 "step": step,
                 "epoch": epoch,
-                "flops": flops,
-                "cumulative_flops": cumulative_flops,
+                "flop": flop,
+                "cumulative_flop": cumulative_flop,
             }
         )
 
-    def log_epoch(self, epoch, flops, cumulative_flops):
+    def log_epoch(self, epoch, flop, cumulative_flop):
         if not self.log_per_epoch:
             return
         self._entries_epoch.append(
             {
                 "type": "epoch",
                 "epoch": epoch,
-                "flops": flops,
-                "cumulative_flops": cumulative_flops,
+                "flop": flop,
+                "cumulative_flop": cumulative_flop,
             }
         )
 
@@ -39,7 +39,7 @@ class CsvLogger(BaseLogger):
         if self.export_path is None:
             return
 
-        fieldnames = ["type", "step", "epoch", "flops", "cumulative_flops"]
+        fieldnames = ["type", "step", "epoch", "flop", "cumulative_flop"]
         with open(self.export_path, "w", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
